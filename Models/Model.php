@@ -65,29 +65,27 @@ class Model extends Db
         return $this->requete('INSERT INTO ' . $this->table . ' (' . $liste_champs .') VALUES(' . $liste_inter . ')', $valeurs);
     }
 
-    public function update(Model $model)
+    public function update(int $id, Model $model)
     {
         $champ = [];
-        $inter = [];
         $valeurs = [];
 
         //On boucle pour éclater les tableaux
         foreach ($model as $champ => $valeur) {
-            //INSERT INTO annonces (titre, decsription, actif) VALUES (?, ?, ?)
-            if ($valeur != null && $champ != 'db' && $champ != 'table') {
-                $champs[] = $champ;
-                $inter[] = "?";
+            //UPDATE annonces SET titre = ?, decsription = ?, actif = ? WHERE id = ?
+            if ($valeur !== null && $champ != 'db' && $champ != 'table') {
+                $champs[] = "$champ = ?";
                 $valeurs[] = $valeur;
             }
             
         }
+        $valeurs [] = $id;
 
         //On transforme le tableau champ en une chaine de caractères
         $liste_champs = implode(', ', $champs);
-        $liste_inter = implode(', ', $inter);
 
         //On execute la requete
-        return $this->requete('INSERT INTO ' . $this->table . ' (' . $liste_champs .') VALUES(' . $liste_inter . ')', $valeurs);
+        return $this->requete('UPDATE ' . $this->table . ' SET ' . $liste_champs . ' WHERE id = ?', $valeurs);
     }
 
     public function hydrate(array $donnees)
@@ -104,6 +102,11 @@ class Model extends Db
             }
         }
         return $this;
+    }
+
+    public function delete(int $id)
+    {
+        return $this->requete("DELETE FROM {$this->table} WHERE id = ?", [$id]);
     }
 
     public function requete(string $sql, array $attributs = null)
